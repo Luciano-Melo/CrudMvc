@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.Messaging;
 using SalesWebMvc.Models;
 using SalesWebMvc.Models.ViewModels;
@@ -41,7 +42,13 @@ namespace SalesWebMvc.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Create(Seller seller)
         {
-             _sellerServices.InsertSeller(seller);
+            if (!ModelState.IsValid)
+            {
+                var departments = new List<Department>();
+                var viewModel = new SellerFormViewModel { Departments = departments, Seller = seller };
+                return View(viewModel);
+            }
+            _sellerServices.InsertSeller(seller);
             return RedirectToAction(nameof(Index));
         }
 
@@ -104,6 +111,13 @@ namespace SalesWebMvc.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Edit(Seller seller, int id)
         {
+            if (!ModelState.IsValid)
+            {
+                var departments = new List<Department>();
+                var viewModel = new SellerFormViewModel { Departments = departments, Seller = seller };
+                return View(viewModel);
+            }
+
             if (id != seller.Id)
             {
                 return RedirectToAction(nameof(Error), new { message = "Id mismatch" });
